@@ -18,4 +18,9 @@ public class MainMenu extends AppCompatActivity {
         Intent intent = new Intent(MainMenu.this, CameraView.class);
         startActivity(intent);
     }
+
+    public void goPrint(View view) {
+        Intent intent = new Intent(MainMenu.this, PrintView.class);
+        startActivity(intent);
+    }
 }
