@@ -1,83 +1,83 @@
 package com.projet.ihm.qrplay;
 
-import android.app.Activity;
+import android.app.AlertDialog;
 import android.os.Bundle;
-import android.view.View;
+import android.support.v7.app.AppCompatActivity;
+import android.util.SparseArray;
 
-import com.google.zxing.ResultPoint;
-import com.google.zxing.client.android.BeepManager;
-import com.journeyapps.barcodescanner.BarcodeCallback;
-import com.journeyapps.barcodescanner.BarcodeResult;
+import com.google.android.gms.samples.vision.barcodereader.BarcodeCapture;
+import com.google.android.gms.samples.vision.barcodereader.BarcodeGraphic;
+import com.google.android.gms.vision.barcode.Barcode;
 
 import java.util.List;
 
-public class CameraView extends Activity {
+import xyz.belvi.mobilevisionbarcodescanner.BarcodeRetriever;
 
-    private static final String TAG = CameraView.class.getSimpleName();
-   // private DecoratedBarcodeView barcodeView;
-    private BeepManager beepManager;
-    private String lastText;
-
-    private BarcodeCallback callback = new BarcodeCallback() {
-        @Override
-        public void barcodeResult(BarcodeResult result) {
-            if(result.getText() == null || result.getText().equals(lastText)) {
-                // Prevent duplicate scans
-                return;
-            }
-
-            lastText = result.getText();
-           // barcodeView.setStatusText(result.getText());
-
-            beepManager.playBeepSoundAndVibrate();
-
-            //Added preview of scanned barcode
-           // ImageView imageView = (ImageView) findViewById(R.id.barcodePreview);
-          // imageView.setImageBitmap(result.getBitmapWithResultPoints(Color.YELLOW));
-        }
-
-        @Override
-        public void possibleResultPoints(List<ResultPoint> resultPoints) {
-        }
-    };
+public class CameraView extends AppCompatActivity implements BarcodeRetriever {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         setContentView(R.layout.activity_camera_view);
-/*
-        barcodeView = (DecoratedBarcodeView) findViewById(R.id.barcode_scanner);
-        Collection<BarcodeFormat> formats = Arrays.asList(BarcodeFormat.QR_CODE, BarcodeFormat.CODE_39);
-        barcodeView.getBarcodeView().setDecoderFactory(new DefaultDecoderFactory(formats));
-        barcodeView.decodeContinuous(callback);
-*/
-        beepManager = new BeepManager(this);
+
+
+        final BarcodeCapture barcodeCapture = (BarcodeCapture) getSupportFragmentManager().findFragmentById(R.id.barcode);
+        barcodeCapture.setRetrieval(this);
+        barcodeCapture.setShowDrawRect(true);
+
+    }
+
+
+    @Override
+    public void onPermissionRequestDenied() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(CameraView.this)
+                .setTitle("Erreur")
+                .setMessage("La camera est néccéssaire!");
+        builder.show();
+    }
+
+    // for one time scan
+    @Override
+    public void onRetrieved(final Barcode barcode) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                AlertDialog.Builder builder = new AlertDialog.Builder(CameraView.this)
+                        .setTitle("code retrieved")
+                        .setMessage(barcode.displayValue);
+                builder.show();
+            }
+        });
+
+    }
+    // for multiple callback
+    @Override
+    public void onRetrievedMultiple(final Barcode closetToClick, final List<BarcodeGraphic> barcodeGraphics) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                String message = "Code selected : " + closetToClick.displayValue + "\n\nother " +
+                        "codes in frame include : \n";
+                for (int index = 0; index < barcodeGraphics.size(); index++) {
+                    Barcode barcode = barcodeGraphics.get(index).getBarcode();
+                    message += (index + 1) + ". " + barcode.displayValue + "\n";
+                }
+                AlertDialog.Builder builder = new AlertDialog.Builder(CameraView.this)
+                        .setTitle("code retrieved")
+                        .setMessage(message);
+                builder.show();
+            }
+        });
+
     }
 
     @Override
-    protected void onResume() {
-        super.onResume();
-
-      //  barcodeView.resume();
+    public void onBitmapScanned(SparseArray<Barcode> sparseArray) {
+        // when image is scanned and processed
     }
 
     @Override
-    protected void onPause() {
-        super.onPause();
-
-    //    barcodeView.pause();
-    }
-
-    public void pause(View view) {
-     //   barcodeView.pause();
-    }
-
-    public void resume(View view) {
-      //  barcodeView.resume();
-    }
-
-    public void triggerScan(View view) {
-      //  barcodeView.decodeSingle(callback);
+    public void onRetrievedFailed(String reason) {
+        // in case of failure
     }
 }
