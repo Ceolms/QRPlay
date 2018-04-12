@@ -1,8 +1,11 @@
 package com.projet.ihm.qrplay;
 
 import android.app.AlertDialog;
+import android.content.Context;
+import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.util.SparseArray;
 
 import com.google.android.gms.samples.vision.barcodereader.BarcodeCapture;
@@ -15,16 +18,60 @@ import xyz.belvi.mobilevisionbarcodescanner.BarcodeRetriever;
 
 public class CameraView extends AppCompatActivity implements BarcodeRetriever {
 
+    private static final String TAG = "CameraView";
+    private static Context mContext;
+    private Player player;
+    MediaPlayer doPlayer;
+
+   // SurfaceView cameraPreview
+    /*
+    final MediaPlayer rePlayer = MediaPlayer.create(view,R.raw.sound_re);
+    final MediaPlayer miPlayer = MediaPlayer.create(view,R.raw.sound_mi);
+    final MediaPlayer faPlayer = MediaPlayer.create(view,R.raw.sound_fa);
+    final MediaPlayer solPlayer = MediaPlayer.create(view,R.raw.sound_sol);
+    final MediaPlayer laPlayer = MediaPlayer.create(view,R.raw.sound_la);
+    */
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_camera_view);
-
+        mContext = getApplicationContext();
 
         final BarcodeCapture barcodeCapture = (BarcodeCapture) getSupportFragmentManager().findFragmentById(R.id.barcode);
         barcodeCapture.setRetrieval(this);
-        barcodeCapture.setShowDrawRect(true);
 
+        player = new Player(this);
+        doPlayer = MediaPlayer.create(this.getContext(),R.raw.sound_do);
+        player.start();
+
+    }
+
+    public void play(String note)
+    {
+        Log.d(TAG,"playing sound");
+        switch (note)
+        {
+
+            case"do":
+                doPlayer.start();
+                break;
+            case"re":
+                //    rePlayer.start();
+                break;
+            case"mi":
+                //   miPlayer.start();
+                break;
+            case"fa":
+                //  faPlayer.start();
+                break;
+            case"sol":
+                //   solPlayer.start();
+                break;
+            case"la":
+                //    laPlayer.start();
+                break;
+        }
     }
 
 
@@ -42,10 +89,9 @@ public class CameraView extends AppCompatActivity implements BarcodeRetriever {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                AlertDialog.Builder builder = new AlertDialog.Builder(CameraView.this)
-                        .setTitle("code retrieved")
-                        .setMessage(barcode.displayValue);
-                builder.show();
+
+                player.addQR(barcode.displayValue);
+                //Log.d(TAG,barcode.displayValue);
             }
         });
 
@@ -56,16 +102,12 @@ public class CameraView extends AppCompatActivity implements BarcodeRetriever {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                String message = "Code selected : " + closetToClick.displayValue + "\n\nother " +
-                        "codes in frame include : \n";
+
                 for (int index = 0; index < barcodeGraphics.size(); index++) {
                     Barcode barcode = barcodeGraphics.get(index).getBarcode();
-                    message += (index + 1) + ". " + barcode.displayValue + "\n";
+                    Log.d(TAG,barcode.displayValue);
                 }
-                AlertDialog.Builder builder = new AlertDialog.Builder(CameraView.this)
-                        .setTitle("code retrieved")
-                        .setMessage(message);
-                builder.show();
+                Log.d(TAG,"----------------");
             }
         });
 
@@ -79,5 +121,10 @@ public class CameraView extends AppCompatActivity implements BarcodeRetriever {
     @Override
     public void onRetrievedFailed(String reason) {
         // in case of failure
+    }
+
+    public static Context getContext() {
+        //  return instance.getApplicationContext();
+        return mContext;
     }
 }

@@ -1,13 +1,22 @@
 package com.projet.ihm.qrplay;
 
+import android.util.Log;
+
 import java.util.ArrayList;
 
 public class Player extends Thread{
 
-    ArrayList<String> listeQR = new ArrayList<String>();
+    private static final String TAG = "Player";
+    CameraView view;
+
+    ArrayList<String> listeQR = new ArrayList<>();
     String instrument = "piano";
-    ArrayList<String> listePiano = new ArrayList<String>();
-    //final MediaPlayer soundPlayer = MediaPlayer.create(this,R.raw.do);
+    ArrayList<String> listePiano = new ArrayList<>();
+
+    Player(CameraView cv)
+    {
+        this.view = cv;
+    }
 
     public void init()
     {
@@ -17,11 +26,14 @@ public class Player extends Thread{
         listePiano.add("4");
     }
 
+
+
     public void run(){
         try {
                 init();
                 ArrayList<String> absents = new ArrayList<String>();
-                while(true){
+                while(true)
+                {
 
                     for(int i = 0 ; i<listeQR.size();i++)
                     {
@@ -34,16 +46,19 @@ public class Player extends Thread{
 
                         }
                         if(!exist) absents.add(qr);
+                        Log.d(TAG,"nbQR:" + listeQR.size());
                     }
-                    if(instrument == "piano");
+                    if(instrument == "piano" && listeQR.size() >0);
                     {
                         for(int i = 0; i < absents.size();i++)
                         {
+                            Log.d(TAG,"NOT FOUND : " + absents.get(i));
                             String val = absents.get(i);
                             switch (val)
                             {
 
                                     case "1":
+                                        view.play("do");
                                         break;
                                     case "2":
                                         break;
@@ -53,20 +68,36 @@ public class Player extends Thread{
                                         break;
                             }
                         }
-
                     }
-
-                    sleep(200);
+                    sleep(2000);
+                    Log.d(TAG,"empty list");
+                    listeQR.clear();
                 }
         }
         catch (Exception e)
         {
-
         }
-
-
     }
 
+    public String showList()
+    {
+        String s = "{";
+        for(int j = 0 ;j < listeQR.size();j++)
+        {
+            s += listeQR.get(j);
+            s+=",";
+        }
+        s+="}";
+        return s;
+    }
 
+    public void addQR(String qr)
+    {
+        if(!listeQR.contains(qr))
+        {
+            listeQR.add(qr);
+        }
+        Log.d(TAG,"adding: " + qr + " , " + showList());
+    }
 
 }
