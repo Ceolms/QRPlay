@@ -46,8 +46,8 @@ public class Player extends Thread{
 
                         }
                         if(!exist) absents.add(qr);
-                        Log.d(TAG,"nbQR:" + listeQR.size());
                     }
+
                     if(instrument == "piano" && listeQR.size() >0);
                     {
                         for(int i = 0; i < absents.size();i++)

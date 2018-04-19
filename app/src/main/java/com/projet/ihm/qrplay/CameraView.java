@@ -1,29 +1,34 @@
 package com.projet.ihm.qrplay;
 
+import android.Manifest;
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.media.MediaPlayer;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
+import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.util.SparseArray;
+import android.view.SurfaceHolder;
+import android.view.SurfaceView;
 
-import com.google.android.gms.samples.vision.barcodereader.BarcodeCapture;
-import com.google.android.gms.samples.vision.barcodereader.BarcodeGraphic;
+import com.google.android.gms.vision.CameraSource;
+import com.google.android.gms.vision.Detector;
 import com.google.android.gms.vision.barcode.Barcode;
+import com.google.android.gms.vision.barcode.BarcodeDetector;
 
-import java.util.List;
+import java.io.IOException;
 
-import xyz.belvi.mobilevisionbarcodescanner.BarcodeRetriever;
-
-public class CameraView extends AppCompatActivity implements BarcodeRetriever {
+public class CameraView extends Activity {
 
     private static final String TAG = "CameraView";
     private static Context mContext;
     private Player player;
     MediaPlayer doPlayer;
 
-   // SurfaceView cameraPreview
+    SurfaceView cameraPreview;
+    BarcodeDetector barcodeDetector;
     /*
     final MediaPlayer rePlayer = MediaPlayer.create(view,R.raw.sound_re);
     final MediaPlayer miPlayer = MediaPlayer.create(view,R.raw.sound_mi);
@@ -37,14 +42,72 @@ public class CameraView extends AppCompatActivity implements BarcodeRetriever {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_camera_view);
         mContext = getApplicationContext();
+        cameraPreview = (SurfaceView) findViewById(R.id.camera_preview);
 
-        final BarcodeCapture barcodeCapture = (BarcodeCapture) getSupportFragmentManager().findFragmentById(R.id.barcode);
-        barcodeCapture.setRetrieval(this);
+        createCameraSource();
 
         player = new Player(this);
         doPlayer = MediaPlayer.create(this.getContext(),R.raw.sound_do);
         player.start();
 
+    }
+
+    public void createCameraSource()
+    {
+        barcodeDetector = new BarcodeDetector.Builder(this).build();
+        final CameraSource cameraSource = new CameraSource.Builder(this,barcodeDetector)
+                .setAutoFocusEnabled(true)
+                .setRequestedPreviewSize(1600,1024)
+                .build();
+        cameraPreview.getHolder().addCallback(new SurfaceHolder.Callback() {
+            @Override
+            public void surfaceCreated(SurfaceHolder holder) {
+
+                if (ContextCompat.checkSelfPermission(getContext(), Manifest.permission.CAMERA)
+                        != PackageManager.PERMISSION_GRANTED) {
+                    // Permission is not granted
+                    return;
+                }
+
+                try {
+                    cameraSource.start(cameraPreview.getHolder());
+                }
+                catch (IOException e)
+                {
+                    e.printStackTrace();
+                }
+
+
+            }
+
+            @Override
+            public void surfaceChanged(SurfaceHolder surfaceHolder, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void surfaceDestroyed(SurfaceHolder surfaceHolder) {
+                cameraSource.stop();
+            }
+        });
+        barcodeDetector.setProcessor(new Detector.Processor<Barcode>() {
+            @Override
+            public void release() {
+
+            }
+
+            @Override
+            public void receiveDetections(Detector.Detections<Barcode> detections) {
+                SparseArray<Barcode> listeCodes = detections.getDetectedItems();
+                if(listeCodes.size() >0)
+                {
+                    for(int i =0 ; i< listeCodes.size();i++)
+                    {
+                        player.addQR(listeCodes.valueAt(i).displayValue);
+                    }
+                }
+            }
+        });
     }
 
     public void play(String note)
@@ -75,52 +138,11 @@ public class CameraView extends AppCompatActivity implements BarcodeRetriever {
     }
 
 
-    @Override
     public void onPermissionRequestDenied() {
         AlertDialog.Builder builder = new AlertDialog.Builder(CameraView.this)
                 .setTitle("Erreur")
                 .setMessage("La camera est néccéssaire!");
         builder.show();
-    }
-
-    // for one time scan
-    @Override
-    public void onRetrieved(final Barcode barcode) {
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-
-                player.addQR(barcode.displayValue);
-                //Log.d(TAG,barcode.displayValue);
-            }
-        });
-
-    }
-    // for multiple callback
-    @Override
-    public void onRetrievedMultiple(final Barcode closetToClick, final List<BarcodeGraphic> barcodeGraphics) {
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-
-                for (int index = 0; index < barcodeGraphics.size(); index++) {
-                    Barcode barcode = barcodeGraphics.get(index).getBarcode();
-                    Log.d(TAG,barcode.displayValue);
-                }
-                Log.d(TAG,"----------------");
-            }
-        });
-
-    }
-
-    @Override
-    public void onBitmapScanned(SparseArray<Barcode> sparseArray) {
-        // when image is scanned and processed
-    }
-
-    @Override
-    public void onRetrievedFailed(String reason) {
-        // in case of failure
     }
 
     public static Context getContext() {
