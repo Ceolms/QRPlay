@@ -24,20 +24,28 @@ public class PrintView extends AppCompatActivity{
 
     private ShareActionProvider mShareActionProvider;
 
-    //imprimer les codes directement
+    /**
+     * imprimer les codes directement
+     */
     public void PrintCodes(View view){
         PrintHelper p = new PrintHelper(this);
         Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.raw.qr_codes);
         p.printBitmap("QR Codes", bitmap);
     }
 
-    //envoyer les codes avec une autre application
+    /**
+     * envoyer les codes vers une autre application
+     */
     public void sendCodes(View view){
         //préparer le fichier
         try {
         File dir = new File(getApplicationContext().getCacheDir(), "qr_print");
-        if(!dir.exists()) //noinspection ResultOfMethodCallIgnored
+        if(!dir.isDirectory()) {
+            if(dir.exists()) //noinspection ResultOfMethodCallIgnored
+                dir.delete();
+            //noinspection ResultOfMethodCallIgnored
             dir.mkdirs();
+        }
         File image = new File(dir, "qr_codes.png");
         if(!image.exists()){
             //copier le fichier depuis les ressources
