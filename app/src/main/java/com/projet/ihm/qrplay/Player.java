@@ -10,6 +10,7 @@ public class Player extends Thread{
     CameraView view;
 
     ArrayList<String> listeQR = new ArrayList<>();
+    ArrayList<String> updateList = new ArrayList<>();
     String instrument = "piano";
     ArrayList<String> listePiano = new ArrayList<>();
 
@@ -26,56 +27,64 @@ public class Player extends Thread{
         listePiano.add("4");
     }
 
-
-
     public void run(){
         try {
                 init();
-                ArrayList<String> absents = new ArrayList<String>();
                 while(true)
                 {
+                    ArrayList<String> absents = new ArrayList<String>();
+                    listeQR.addAll(updateList);
+                    updateList.clear();
+                    absents.clear();
+                    //Log.d(TAG,"--" + listeQR.size());
 
                     for(int i = 0 ; i<listeQR.size();i++)
                     {
-                        String qr = listeQR.get(i);
-                        boolean exist = false;
-
-                        for(int j = 0 ;j < listePiano.size();j++)
+                        for(int j = 0 ; j < listePiano.size();j++)
                         {
-                            if(qr == listePiano.get(j)) exist = true;
-
+                            // si une note est dans le piano mais son qr code n'est pas visible , on l'ajoute
+                            // a la liste des notes qui seront joués.
+                            if(!listeQR.contains(listePiano.get(i)) && !absents.contains(listeQR.get(i)))
+                            {
+                                absents.add(listeQR.get(i));
+                            }
                         }
-                        if(!exist) absents.add(qr);
                     }
 
-                    if(instrument == "piano" && listeQR.size() >0);
+                    Log.d(TAG,"--ListeQR : " + showList());
+                    Log.d(TAG,"--abscents : " + absents.size());
+
+                    if(instrument.equals("piano") && listeQR.size() >0)
                     {
                         for(int i = 0; i < absents.size();i++)
                         {
-                            Log.d(TAG,"NOT FOUND : " + absents.get(i));
+                            Log.d(TAG,"--NOT FOUND : " + absents.get(i));
                             String val = absents.get(i);
                             switch (val)
                             {
-
                                     case "1":
                                         view.play("do");
                                         break;
                                     case "2":
+                                        view.play("re");
                                         break;
                                     case "3":
+                                        view.play("mi");
                                         break;
                                     case "4":
+                                        view.play("fa");
                                         break;
                             }
                         }
                     }
-                    sleep(2000);
-                    Log.d(TAG,"empty list");
+                    sleep(1000);
+                    //Log.d(TAG,"--empty list");
                     listeQR.clear();
                 }
         }
         catch (Exception e)
         {
+            Log.d(TAG,"--ERROR : " + e.getMessage());
         }
     }
 
@@ -93,11 +102,10 @@ public class Player extends Thread{
 
     public void addQR(String qr)
     {
-        if(!listeQR.contains(qr))
+        if(!updateList.contains(qr))
         {
-            listeQR.add(qr);
+            updateList.add(qr);
+           // Log.d(TAG,"--adding: " + qr + " , " + showList());
         }
-        Log.d(TAG,"adding: " + qr + " , " + showList());
     }
-
 }

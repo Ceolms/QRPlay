@@ -25,7 +25,12 @@ public class CameraView extends Activity {
     private static final String TAG = "CameraView";
     private static Context mContext;
     private Player player;
-    MediaPlayer doPlayer;
+    MediaPlayer doPlayer ;
+    MediaPlayer rePlayer;
+    MediaPlayer miPlayer;
+    MediaPlayer faPlayer;
+    MediaPlayer solPlayer;
+    MediaPlayer laPlayer;
 
     SurfaceView cameraPreview;
     BarcodeDetector barcodeDetector;
@@ -48,6 +53,12 @@ public class CameraView extends Activity {
 
         player = new Player(this);
         doPlayer = MediaPlayer.create(this.getContext(),R.raw.sound_do);
+        rePlayer = MediaPlayer.create(this.getContext(),R.raw.sound_re);
+        miPlayer = MediaPlayer.create(this.getContext(),R.raw.sound_mi);
+        faPlayer = MediaPlayer.create(this.getContext(),R.raw.sound_fa);
+        solPlayer = MediaPlayer.create(this.getContext(),R.raw.sound_sol);
+        laPlayer = MediaPlayer.create(this.getContext(),R.raw.sound_la);
+
         player.start();
 
     }
@@ -112,7 +123,7 @@ public class CameraView extends Activity {
 
     public void play(String note)
     {
-        Log.d(TAG,"playing sound");
+        Log.d(TAG,"--playing sound : " + note);
         switch (note)
         {
 
@@ -120,19 +131,19 @@ public class CameraView extends Activity {
                 doPlayer.start();
                 break;
             case"re":
-                //    rePlayer.start();
+                rePlayer.start();
                 break;
             case"mi":
-                //   miPlayer.start();
+                miPlayer.start();
                 break;
             case"fa":
-                //  faPlayer.start();
+                faPlayer.start();
                 break;
             case"sol":
-                //   solPlayer.start();
+                solPlayer.start();
                 break;
             case"la":
-                //    laPlayer.start();
+                laPlayer.start();
                 break;
         }
     }
