@@ -21,10 +21,10 @@ public class Player extends Thread{
 
     public void init()
     {
-        listePiano.add("1");
-        listePiano.add("2");
-        listePiano.add("3");
-        listePiano.add("4");
+        listePiano.add("Do");
+        listePiano.add("Re");
+        listePiano.add("Mi");
+        listePiano.add("Fa");
     }
 
     public void run(){
@@ -62,22 +62,22 @@ public class Player extends Thread{
                             String val = absents.get(i);
                             switch (val)
                             {
-                                    case "1":
-                                        view.play("do");
+                                    case "Do":
+                                        view.play("Do");
                                         break;
-                                    case "2":
-                                        view.play("re");
+                                    case "Re":
+                                        view.play("Re");
                                         break;
-                                    case "3":
-                                        view.play("mi");
+                                    case "Mi":
+                                        view.play("Mi");
                                         break;
-                                    case "4":
-                                        view.play("fa");
+                                    case "Fa":
+                                        view.play("Fa");
                                         break;
                             }
                         }
                     }
-                    sleep(1000);
+                    sleep(500);
                     //Log.d(TAG,"--empty list");
                     listeQR.clear();
                 }

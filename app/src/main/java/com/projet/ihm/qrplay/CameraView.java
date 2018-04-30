@@ -127,22 +127,22 @@ public class CameraView extends Activity {
         switch (note)
         {
 
-            case"do":
+            case"Do":
                 doPlayer.start();
                 break;
-            case"re":
+            case"Re":
                 rePlayer.start();
                 break;
-            case"mi":
+            case"Mi":
                 miPlayer.start();
                 break;
-            case"fa":
+            case"Fa":
                 faPlayer.start();
                 break;
-            case"sol":
+            case"Sol":
                 solPlayer.start();
                 break;
-            case"la":
+            case"La":
                 laPlayer.start();
                 break;
         }
