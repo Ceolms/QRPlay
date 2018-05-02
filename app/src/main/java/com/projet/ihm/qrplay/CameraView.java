@@ -10,8 +10,10 @@ import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.util.SparseArray;
+import android.view.View;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
+import android.widget.Toast;
 
 import com.google.android.gms.vision.CameraSource;
 import com.google.android.gms.vision.Detector;
@@ -23,7 +25,7 @@ import java.io.IOException;
 public class CameraView extends Activity {
 
     private static final String TAG = "CameraView";
-    private static Context mContext;
+
     private Player player;
     MediaPlayer doPlayer ;
     MediaPlayer rePlayer;
@@ -46,21 +48,27 @@ public class CameraView extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_camera_view);
-        mContext = getApplicationContext();
-        cameraPreview = (SurfaceView) findViewById(R.id.camera_preview);
+
+        cameraPreview = findViewById(R.id.camera_preview);
 
         createCameraSource();
 
         player = new Player(this);
-        doPlayer = MediaPlayer.create(this.getContext(),R.raw.sound_do);
-        rePlayer = MediaPlayer.create(this.getContext(),R.raw.sound_re);
-        miPlayer = MediaPlayer.create(this.getContext(),R.raw.sound_mi);
-        faPlayer = MediaPlayer.create(this.getContext(),R.raw.sound_fa);
-        solPlayer = MediaPlayer.create(this.getContext(),R.raw.sound_sol);
-        laPlayer = MediaPlayer.create(this.getContext(),R.raw.sound_la);
+        doPlayer = MediaPlayer.create(getApplicationContext(),R.raw.sound_do);
+        rePlayer = MediaPlayer.create(getApplicationContext(),R.raw.sound_re);
+        miPlayer = MediaPlayer.create(getApplicationContext(),R.raw.sound_mi);
+        faPlayer = MediaPlayer.create(getApplicationContext(),R.raw.sound_fa);
+        solPlayer = MediaPlayer.create(getApplicationContext(),R.raw.sound_sol);
+        laPlayer = MediaPlayer.create(getApplicationContext(),R.raw.sound_la);
 
         player.start();
 
+    }
+
+    @Override
+    protected void onDestroy() {
+        player.activityDestroyed = true;
+        super.onDestroy();
     }
 
     public void createCameraSource()
@@ -74,7 +82,7 @@ public class CameraView extends Activity {
             @Override
             public void surfaceCreated(SurfaceHolder holder) {
 
-                if (ContextCompat.checkSelfPermission(getContext(), Manifest.permission.CAMERA)
+                if (ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.CAMERA)
                         != PackageManager.PERMISSION_GRANTED) {
                     // Permission is not granted
                     return;
@@ -148,16 +156,23 @@ public class CameraView extends Activity {
         }
     }
 
+    public void record(View view){
+        if(!player.commandeEnregistrement){
+            if(!player.statutEnregistrement) {
+                Toast toast = Toast.makeText(this, getString(R.string.record), Toast.LENGTH_SHORT);
+                toast.show();
+            }else{
+                Toast toast = Toast.makeText(this, getString(R.string.record_end), Toast.LENGTH_SHORT);
+                toast.show();
+            }
+            player.commandeEnregistrement = true;
+        }
+    }
 
     public void onPermissionRequestDenied() {
         AlertDialog.Builder builder = new AlertDialog.Builder(CameraView.this)
                 .setTitle("Erreur")
                 .setMessage("La camera est néccéssaire!");
         builder.show();
-    }
-
-    public static Context getContext() {
-        //  return instance.getApplicationContext();
-        return mContext;
     }
 }
