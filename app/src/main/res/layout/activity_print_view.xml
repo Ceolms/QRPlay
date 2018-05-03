@@ -53,5 +53,5 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@raw/qr_codes" />
+        app:srcCompat="@raw/barcodes" />
 </android.support.constraint.ConstraintLayout>

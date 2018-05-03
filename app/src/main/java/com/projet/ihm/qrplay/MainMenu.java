@@ -21,7 +21,7 @@ public class MainMenu extends AppCompatActivity {
     }
 
     /**
-     * Called when the user taps the Send button
+     * Called when the user taps the Start button
      */
     public void sendMessage(View view) {
         Intent intent = new Intent(MainMenu.this, CameraView.class);
