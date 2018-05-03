@@ -1,25 +1,36 @@
 package com.projet.ihm.qrplay;
 
+import android.content.Intent;
 import android.util.Log;
+import android.net.Uri;
+import android.support.v4.content.FileProvider;
 
 import java.util.ArrayList;
+import java.io.*;
 
 public class Player extends Thread{
 
     private static final String TAG = "Player";
     CameraView view;
+    public boolean activityDestroyed = false;
 
-    ArrayList<String> listeQR = new ArrayList<>();
-    ArrayList<String> updateList = new ArrayList<>();
-    String instrument = "piano";
-    ArrayList<String> listePiano = new ArrayList<>();
+    private ArrayList<String> listeQR = new ArrayList<>();
+    private ArrayList<String> updateList = new ArrayList<>();
+    private String instrument = "piano";
+    private ArrayList<String> listePiano = new ArrayList<>();
+
+    //variables d'enregistrement
+    public boolean commandeEnregistrement = false;
+    public boolean statutEnregistrement = false;
+    private int tempsEnregistrement = 0;
+    private ArrayList<Note> listeEnregistrement = new ArrayList<>();
 
     Player(CameraView cv)
     {
         this.view = cv;
     }
 
-    public void init()
+    private void init()
     {
         listePiano.add("Do");
         listePiano.add("Re");
@@ -30,9 +41,50 @@ public class Player extends Thread{
     public void run(){
         try {
                 init();
-                while(true)
+                while(!activityDestroyed)
                 {
-                    ArrayList<String> absents = new ArrayList<String>();
+                    //lancement et arret de l'enregistrement
+                    if(commandeEnregistrement){
+                        commandeEnregistrement = false;
+                        statutEnregistrement = !statutEnregistrement;
+                        if(!statutEnregistrement && tempsEnregistrement > 0){
+
+                            //enregistrement
+                            int n = 0;
+                            File file = new File(view.getApplicationContext().getExternalFilesDir(null), n + ".txt");
+                            while(file.exists()){
+                                n++;
+                                file = new File(view.getApplicationContext().getExternalFilesDir(null), n + ".txt");
+                            }
+                            //noinspection ResultOfMethodCallIgnored
+                            file.createNewFile();
+                            OutputStream out = new FileOutputStream(file);
+                            OutputStreamWriter writer = new OutputStreamWriter(out);
+                            writer.write(tempsEnregistrement + "\n");
+                            for (Note note : listeEnregistrement) {
+                                writer.write(note.temps + " " + note.valeur + "\n");
+                            }
+                            writer.close();
+                            out.close();
+
+                            //propose de partager le fichier
+                            Uri fileUri = FileProvider.getUriForFile(view.getApplicationContext(), "com.projet.ihm.qrplay.fileprovider", file);
+
+                            Intent shareIntent = new Intent();
+                            shareIntent.setAction(Intent.ACTION_SEND);
+                            shareIntent.putExtra(Intent.EXTRA_STREAM, fileUri);
+                            shareIntent.setType("text/plain");
+                            view.startActivity(Intent.createChooser(shareIntent, view.getString(R.string.share)));
+
+                            //reinitialisation
+                            tempsEnregistrement = 0;
+                            listeEnregistrement.clear();
+                        }
+                    }
+
+                    if(statutEnregistrement) tempsEnregistrement++;
+
+                    ArrayList<String> absents = new ArrayList<>();
                     listeQR.addAll(updateList);
                     updateList.clear();
                     absents.clear();
@@ -64,15 +116,19 @@ public class Player extends Thread{
                             {
                                     case "Do":
                                         view.play("Do");
+                                        if(statutEnregistrement) listeEnregistrement.add(new Note("Do", tempsEnregistrement));
                                         break;
                                     case "Re":
                                         view.play("Re");
+                                        if(statutEnregistrement) listeEnregistrement.add(new Note("Re", tempsEnregistrement));
                                         break;
                                     case "Mi":
                                         view.play("Mi");
+                                        if(statutEnregistrement) listeEnregistrement.add(new Note("Mi", tempsEnregistrement));
                                         break;
                                     case "Fa":
                                         view.play("Fa");
+                                        if(statutEnregistrement) listeEnregistrement.add(new Note("Fa", tempsEnregistrement));
                                         break;
                             }
                         }
@@ -88,7 +144,7 @@ public class Player extends Thread{
         }
     }
 
-    public String showList()
+    private String showList()
     {
         String s = "{";
         for(int j = 0 ;j < listeQR.size();j++)

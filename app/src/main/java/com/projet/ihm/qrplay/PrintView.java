@@ -11,7 +11,6 @@ import android.support.v4.print.PrintHelper;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.ShareActionProvider;
 
 
 public class PrintView extends AppCompatActivity{
@@ -22,13 +21,12 @@ public class PrintView extends AppCompatActivity{
         setContentView(R.layout.activity_print_view);
     }
 
-    private ShareActionProvider mShareActionProvider;
-
     /**
      * imprimer les codes directement
      */
-    public void PrintCodes(View view){
+    public void printCodes(View view){
         PrintHelper p = new PrintHelper(this);
+        p.setScaleMode(PrintHelper.SCALE_MODE_FIT);
         Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.raw.qr_codes);
         p.printBitmap("QR Codes", bitmap);
     }
