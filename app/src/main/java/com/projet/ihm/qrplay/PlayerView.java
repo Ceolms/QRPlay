@@ -178,10 +178,6 @@ public class PlayerView extends AppCompatActivity {
      * @param p progression actuelle
      */
     public void progress(int p){
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            playerBar.setProgress(p, true);
-        }else{
-            playerBar.setProgress(p);
-        }
+        playerBar.setProgress(p);
     }
 }

@@ -92,7 +92,9 @@ public class PrintView extends AppCompatActivity{
             dir.mkdirs();
         }
         File image = new File(dir, "qr_codes.png");
-        if(!image.exists()){
+        if(image.exists()){
+            image.delete();
+        }
             //copier le fichier depuis les ressources
             InputStream in = null;
 
@@ -108,7 +110,7 @@ public class PrintView extends AppCompatActivity{
             out.flush();
             out.close();
             in.close();
-        }
+
         Uri imageUri = FileProvider.getUriForFile(getApplicationContext(), "com.projet.ihm.qrplay.fileprovider", image);
 
         //envoyer le fichier
