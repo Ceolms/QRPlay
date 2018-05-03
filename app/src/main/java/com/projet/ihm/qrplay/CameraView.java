@@ -3,10 +3,10 @@ package com.projet.ihm.qrplay;
 import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.content.Context;
 import android.content.pm.PackageManager;
 import android.media.MediaPlayer;
 import android.os.Bundle;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.util.SparseArray;
@@ -25,9 +25,11 @@ import java.io.IOException;
 public class CameraView extends Activity {
 
     private static final String TAG = "CameraView";
+    private static final int PERMISSION = 1;
 
+    private CameraView view = this;
     private Player player;
-    MediaPlayer doPlayer ;
+    MediaPlayer doPlayer;
     MediaPlayer rePlayer;
     MediaPlayer miPlayer;
     MediaPlayer faPlayer;
@@ -51,17 +53,24 @@ public class CameraView extends Activity {
 
         cameraPreview = findViewById(R.id.camera_preview);
 
-        createCameraSource();
-
         player = new Player(this);
-        doPlayer = MediaPlayer.create(getApplicationContext(),R.raw.sound_do);
-        rePlayer = MediaPlayer.create(getApplicationContext(),R.raw.sound_re);
-        miPlayer = MediaPlayer.create(getApplicationContext(),R.raw.sound_mi);
-        faPlayer = MediaPlayer.create(getApplicationContext(),R.raw.sound_fa);
-        solPlayer = MediaPlayer.create(getApplicationContext(),R.raw.sound_sol);
-        laPlayer = MediaPlayer.create(getApplicationContext(),R.raw.sound_la);
+        doPlayer = MediaPlayer.create(getApplicationContext(), R.raw.sound_do);
+        rePlayer = MediaPlayer.create(getApplicationContext(), R.raw.sound_re);
+        miPlayer = MediaPlayer.create(getApplicationContext(), R.raw.sound_mi);
+        faPlayer = MediaPlayer.create(getApplicationContext(), R.raw.sound_fa);
+        solPlayer = MediaPlayer.create(getApplicationContext(), R.raw.sound_sol);
+        laPlayer = MediaPlayer.create(getApplicationContext(), R.raw.sound_la);
 
-        player.start();
+        if (ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.CAMERA)
+                != PackageManager.PERMISSION_GRANTED) {
+            // Permission is not granted
+            ActivityCompat.requestPermissions(view,
+                    new String[]{Manifest.permission.CAMERA},
+                    PERMISSION);
+        } else {
+            createCameraSource();
+            player.start();
+        }
 
     }
 
@@ -71,24 +80,20 @@ public class CameraView extends Activity {
         super.onDestroy();
     }
 
-    public void createCameraSource()
-    {
+    public void createCameraSource() {
         barcodeDetector = new BarcodeDetector.Builder(this).build();
-        final CameraSource cameraSource = new CameraSource.Builder(this,barcodeDetector)
+        final CameraSource cameraSource = new CameraSource.Builder(this, barcodeDetector)
                 .setAutoFocusEnabled(true)
-                .setRequestedPreviewSize(1600,1024)
+                .setRequestedPreviewSize(1600, 1024)
                 .build();
         cameraPreview.getHolder().addCallback(new SurfaceHolder.Callback() {
             @Override
             public void surfaceCreated(SurfaceHolder holder) {
 
-                if (ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.CAMERA)
-                        != PackageManager.PERMISSION_GRANTED) {
-                    // Permission is not granted
-                    return;
-                }
-
                 try {
+                    if (ActivityCompat.checkSelfPermission(view, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+                        return;
+                    }
                     cameraSource.start(cameraPreview.getHolder());
                 }
                 catch (IOException e)
@@ -129,6 +134,10 @@ public class CameraView extends Activity {
         });
     }
 
+    /**
+     * Joue une note
+     * @param note Le nom de la note a jouer
+     */
     public void play(String note)
     {
         Log.d(TAG,"--playing sound : " + note);
@@ -156,6 +165,9 @@ public class CameraView extends Activity {
         }
     }
 
+    /**
+     * action pour lancer ou arreter l'enregistrement
+     */
     public void record(View view){
         if(!player.commandeEnregistrement){
             if(!player.statutEnregistrement) {
@@ -169,10 +181,24 @@ public class CameraView extends Activity {
         }
     }
 
-    public void onPermissionRequestDenied() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(CameraView.this)
-                .setTitle("Erreur")
-                .setMessage("La camera est néccéssaire!");
-        builder.show();
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case PERMISSION: {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    // permission was granted
+                    createCameraSource();
+                    player.start();
+                } else {
+                    // permission denied
+                    AlertDialog.Builder builder = new AlertDialog.Builder(CameraView.this)
+                            .setTitle("Erreur")
+                            .setMessage("La camera est néccéssaire!");
+                    builder.show();
+                }
+            }
+        }
     }
 }

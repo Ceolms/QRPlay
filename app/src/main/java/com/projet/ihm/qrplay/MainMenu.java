@@ -29,6 +29,14 @@ public class MainMenu extends AppCompatActivity {
     }
 
     /**
+     * Called when the user taps the Send button
+     */
+    public void playRecord(View view) {
+        Intent intent = new Intent(MainMenu.this, PlayerView.class);
+        startActivity(intent);
+    }
+
+    /**
      * Called when the user taps the Print button
      */
     public void goPrint(View view) {

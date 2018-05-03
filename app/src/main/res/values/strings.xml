@@ -1,10 +1,11 @@
 <resources>
     <string name="app_name">QRPlay</string>
     <string name="start">Start !</string>
-    <string name="or">or</string>
     <string name="preview">Preview</string>
     <string name="print">Print</string>
     <string name="share">Share</string>
     <string name="record">Begin audio recording</string>
     <string name="record_end">End of recording</string>
+    <string name="record_play">Play recording</string>
+    <string name="read_error">Error: unable to read file</string>
 </resources>
