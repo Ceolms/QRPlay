@@ -25,6 +25,11 @@
                 <action android:name="android.intent.action.MAIN" />
             </intent-filter>
         </activity>
+        <activity android:name=".PlayerView">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+            </intent-filter>
+        </activity>
         <activity android:name=".PrintView">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
